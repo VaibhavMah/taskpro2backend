@@ -18,40 +18,25 @@ exports.register = async (req, res) => {
   }
 };
 
-
-exports.loginUser = async (req, res) => {
-  const { email, password } = req.body;
-
+// Example login function
+exports.login = async (req, res) => {
   try {
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email: req.body.email });
     if (!user) {
       return res.status(400).json({ error: 'Invalid email or password' });
     }
 
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-    if (!isPasswordValid) {
+    // Compare password with the stored hash
+    const isMatch = await bcryptjs.compare(req.body.password, user.password);
+
+    if (!isMatch) {
       return res.status(400).json({ error: 'Invalid email or password' });
     }
 
-    // Generate JWT token
-    const token = jwt.sign(
-      { id: user._id, email: user.email },
-      process.env.JWT_SECRET,
-      { expiresIn: '1h' }
-    );
-
-    // Set the token as a cookie
-    res.cookie('authToken', token, {
-      httpOnly: true, // Prevents client-side JavaScript from accessing the cookie
-      secure: process.env.NODE_ENV === 'production', // Ensures cookie is sent only over HTTPS
-      maxAge: 60 * 60 * 1000, // 1 hour
-    });
-
-    // Respond with success
-    res.status(200).json({ message: 'Login successful', token });
+    // Create JWT token with email and user ID
+    const token = jwt.sign({ id: user._id, email: user.email }, process.env.JWT_SECRET, { expiresIn: '1h' });
+    res.json({ token });
   } catch (err) {
-    console.error('Error during login:', err);
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(500).json({ error: 'Server error' });
   }
 };
-
