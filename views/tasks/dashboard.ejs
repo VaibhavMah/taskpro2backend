@@ -1,0 +1,25 @@
+<h1>Welcome, <%= user.email %></h1>
+<h2>Your Tasks</h2>
+
+<!-- Add Task Button -->
+<a href="/tasks/add" class="btn btn-primary">Add Task</a>
+
+<!-- Task List -->
+<table class="table mt-4">
+  <thead>
+    <tr>
+      <th>Title</th>
+      <th>Due Date</th>
+      <th>Priority</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% tasks.forEach(task => { %>
+      <tr>
+        <td><%= task.title %></td>
+        <td><%= new Date(task.dueDate).toLocaleDateString() %></td>
+        <td><%= task.priority %></td>
+      </tr>
+    <% }) %>
+  </tbody>
+</table>
