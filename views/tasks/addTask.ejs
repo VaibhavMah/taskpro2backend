@@ -1,25 +1,37 @@
-<% include layout.ejs %>
-<h2>Add New Task</h2>
-<form action="/add-task" method="POST">
-  <div class="mb-3">
-    <label for="title" class="form-label">Title</label>
-    <input type="text" name="title" id="title" class="form-control" required>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Add Task</title>
+</head>
+<body>
+  <h1>Add New Task</h1>
+  
+  <form action="/add-task" method="POST">
+    <label for="title">Task Title:</label>
+    <input type="text" id="title" name="title" required><br><br>
+  
+    <label for="dueDate">Due Date:</label>
+    <input type="date" id="dueDate" name="dueDate" required><br><br>
+  
+    <label for="dueTime">Due Time:</label>
+    <input type="time" id="dueTime" name="dueTime" ><br><br>
+  
+    <label for="priority">Priority:</label>
+    <select id="priority" name="priority" required>
+      <option value="Low">Low</option>
+      <option value="Medium">Medium</option>
+      <option value="High">High</option>
+    </select><br><br>
+  
+    <button type="submit">Add Task</button>
+  </form>
+  
+  
+  
+  <div>
+    <a href="/dashboard" style="text-decoration: none;">
+      <button type="button">Back to Dashboard</button>
+    </a>
   </div>
-  <div class="mb-3">
-    <label for="dueDate" class="form-label">Due Date</label>
-    <input type="date" name="dueDate" id="dueDate" class="form-control" required>
-  </div>
-  <div class="mb-3">
-    <label for="dueTime" class="form-label">Due Time</label>
-    <input type="time" name="dueTime" id="dueTime" class="form-control" required>
-  </div>
-  <div class="mb-3">
-    <label for="priority" class="form-label">Priority</label>
-    <select name="priority" id="priority" class="form-control">
-      <option value="low">Low</option>
-      <option value="medium">Medium</option>
-      <option value="high">High</option>
-    </select>
-  </div>
-  <button type="submit" class="btn btn-primary">Add Task</button>
-</form>
+</body>
+</html>

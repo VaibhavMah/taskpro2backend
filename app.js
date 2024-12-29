@@ -7,6 +7,7 @@ require('dotenv').config();
 
 const authRoutes = require('./backend/routes/authRoutes');
 const taskRoutes = require('./backend/routes/taskRoutes');
+const ejsRoutes=   require('./backend/routes/ejsRoutes')
 
 const app = express();
 
@@ -22,8 +23,10 @@ app.set('views', path.join(__dirname, 'views'));
 // Routes
 app.use('/auth', authRoutes);
 app.use('/tasks', taskRoutes);
+app.use('/',ejsRoutes);
 
 // Connect to DB and start server
+
 mongoose
   .connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => {

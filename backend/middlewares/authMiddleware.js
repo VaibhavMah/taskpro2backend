@@ -1,21 +1,26 @@
 const jwt = require('jsonwebtoken');
+
 const authMiddleware = (req, res, next) => {
-const token = req.header('Authorization') && req.header('Authorization').replace('Bearer ', '');
+  const token = req.cookies.authToken; // Ensure the cookie name matches
+  console.log('Token received:', token);
 
   if (!token) {
-    return res.status(401).json({ error: 'No token provided' });
+    console.log('No token found. Redirecting to /auth/login');
+    return res.redirect('/auth/login');
   }
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded;
-    console.log("Decoded user:", decoded);  // Debugging line
-    next();
+    const decoded = jwt.verify(token, process.env.JWT_SECRET); // Verify the JWT
+    console.log('Decoded token:', decoded);
+    req.user = decoded; // Attach user info to the request object
+    next(); // Proceed to the next middleware/route handler
   } catch (err) {
-    res.status(401).json({ error: 'Invalid token' });
+    console.error('JWT verification failed:', err.message);
+    res.clearCookie('authToken');
+    res.redirect('/auth/login');
   }
 };
 
-
 module.exports = authMiddleware;
+
 
