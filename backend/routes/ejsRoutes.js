@@ -4,6 +4,18 @@ const authMiddleware = require('../middlewares/authMiddleware');
 const router=express.Router()
 
 const Task = require('../models/Task'); // Import your Task model
+const nodemailer = require('nodemailer');
+
+const createTransporter = () => {
+  return nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS,
+    },
+  });
+};
+
 
 router.get('/dashboard', authMiddleware, async (req, res) => {
   try {
@@ -25,7 +37,7 @@ router.get('/add-task', authMiddleware, (req, res) => {
     const { title, dueDate, dueTime, priority } = req.body;
   
     console.log('Request body:', req.body);  // Check incoming request data
-  
+    
     try {
       const today = new Date();
       const dueDateObj = new Date(dueDate);
@@ -51,7 +63,7 @@ router.get('/add-task', authMiddleware, (req, res) => {
       console.log('Due Date with Time:', dueDateObj);
   
       // Create the task if the validation passes
-      await Task.create({
+      const task = await Task.create({
         title,
         dueDate: dueDateObj,  // Store the complete date with time
         dueTime,  // Save the time as a string (e.g., '21:00')
@@ -59,16 +71,29 @@ router.get('/add-task', authMiddleware, (req, res) => {
         userId: req.user.id,
       });
   
+      // Create transporter for sending email
+      const transporter = createTransporter();
+      const userEmail = req.user.email;
+  
+      // Prepare email options
+      const mailOptions = {
+        from: process.env.EMAIL_USER,
+        to: userEmail,
+        subject: 'Task Created Successfully',
+        text: `Dear User,\n\nYou have successfully created a new task:\n\nTitle: ${title}\nDue Date: ${dueDateObj.toLocaleDateString()} \nDue Time: ${dueTime}\nPriority: ${priority}\n\nThank you!`,
+      };
+  
+      // Send email after task is created
+      await transporter.sendMail(mailOptions);
+      console.log("Email sent successfully.");
+  
+      // Redirect to the dashboard
       res.redirect('/dashboard');
     } catch (err) {
-      console.error('Error adding task:', err);
+      console.error('Error adding task or sending email:', err);
       res.status(500).send('Internal Server Error');
     }
   });
-  
-  
-
-  
   
 
 module.exports=router

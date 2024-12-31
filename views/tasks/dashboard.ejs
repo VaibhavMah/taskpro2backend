@@ -15,8 +15,21 @@
           <strong>Due Date:</strong> <%= task.dueDate.toLocaleDateString() %><br>
           <strong>Due Time:</strong> <%= task.dueTime %><br> <!-- 24-hour format time -->
           <strong>Priority:</strong> <%= task.priority %>
+          <strong>Status:</strong> <%= task.completed ? 'Done' : 'Pending' %><br>
+          <form action="/tasks/toggle-status/<%= task._id %>" method="POST" style="display:inline;">
+            <label>
+              <input
+                type="checkbox"
+                name="completed"
+                <%= task.completed ? 'checked' : '' %>
+                onchange="this.form.submit()"
+              >
+              Mark as Done
+            </label>
+          </form>
         </li>
-      <% }); %>
+      <% }
+    ); %>
     </ul>
   <% } else { %>
     <p>You have no tasks yet.</p>
