@@ -1,44 +1,49 @@
 const express = require('express');
 const authMiddleware = require('../middlewares/authMiddleware');
-const { getTasks} = require('../controllers/taskController');
-const Task=require('../models/Task')
+const { getTasks, addTask, getPendingTasks,getCompletedTasks } = require('../controllers/taskController');
+const Task = require('../models/Task');
+const sendEmail = require('../utils/sendEmail');
 
 const router = express.Router();
 
-
 router.get('/', authMiddleware, getTasks);
-router.post('/toggle-status/:id',authMiddleware, async (req, res) => {
-    try {
-      const { id } = req.params;
-      const task = await Task.findById(id);
-  
-      if (!task) {
-        return res.status(404).send('Task not found');
-      }
-  
-      // Toggle the 'completed' field
-      task.completed = !task.completed;
-      await task.save();
-  
-      // Send email notification if the task is marked as done
-      const transporter = createTransporter();
-      const userEmail = req.user.email; // Assuming `req.user` contains authenticated user's data
-  
-      const mailOptions = {
-        from: process.env.EMAIL_USER,
-        to: userEmail,
-        subject: task.completed ? 'Task Marked as Done' : 'Task Marked as Incomplete',
-        text: `Dear User,\n\nThe following task has been updated:\n\nTitle: ${task.title}\nStatus: ${task.completed ? 'Done' : 'Incomplete'}\n\nThank you for using our task management system!`,
-      };
-  
-      await transporter.sendMail(mailOptions);
-  
-      res.redirect('/dashboard');
-    } catch (err) {
-      console.error('Error toggling task status or sending email:', err);
-      res.status(500).send('Internal Server Error');
+router.get('/pending',authMiddleware,getPendingTasks)
+router.get('/completed',authMiddleware,getCompletedTasks)
+router.post('/', authMiddleware, addTask);
+
+router.post('/toggle-status/:id', authMiddleware, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { completed } = req.body;
+
+    const task = await Task.findById(id);
+
+    if (!task) {
+      return res.status(404).send('Task not found');
     }
-  });
+
+    // Toggle the 'completed' field
+    task.completed = completed;
+    task.completedAt = completed ? new Date() : null;
+    await task.save();
+
+    // Send email notification if the task status changes
+    const userEmail = req.user.email; // Assuming `req.user` contains authenticated user's data
+    const subject = task.completed ? 'Task Marked as Done' : 'Task Marked as Pending';
+    const statusText = task.completed ? 'Done' : 'Incomplete';
+
+    await sendEmail(
+      userEmail, // recipient email
+      subject, // subject
+      task.dueDate, // due date
+      `The task "${task.title}" has been updated to status: ${statusText}. Priority: ${task.priority}.`
+    );
+
+    res.status(200).json({ message: `Task marked as ${completed ? 'done' : 'pending'}` });
+  } catch (err) {
+    console.error('Error toggling task status or sending email:', err);
+    res.status(500).send('Internal Server Error');
+  }
+});
+
 module.exports = router;
-
-

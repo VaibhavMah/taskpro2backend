@@ -4,6 +4,15 @@ const bcrypt = require('bcrypt');
 const userSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
+  username: {
+    type: String,
+    required: false,  // Optional for initial registration
+    default: null,  
+    },  // Ensure it's set to null by default if not provided
+    isVerified: { type: Boolean, default: false },
+    verificationCode: { type: String }, // 4-digit code
+    codeExpiration: { type: Date }, // Expiration time for the code
+  
 });
 
 userSchema.pre('save', async function (next) {
