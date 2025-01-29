@@ -11,6 +11,7 @@ const taskRoutes = require('./backend/routes/taskRoutes');
 
 const app = express();
 
+const port=process.env.PORT||4000;
 // Middleware
 app.use(cors({ origin: 'http://localhost:5173', credentials: true })); // Vite frontend
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -27,6 +28,6 @@ app.use('/api/tasks', taskRoutes);
 mongoose
   .connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => {
-    app.listen(process.env.PORT, () => console.log(`Server running on port ${process.env.PORT}`));
+    app.listen(port, () => console.log(`Server running on port ${port}`));
   })
   .catch((err) => console.log(err));
