@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
-const bcryptjs = require('bcryptjs');
+const bcryptjs = require('bcrypt');
 const crypto=require('crypto');
 const sendVerificationEmail=require('../utils/sendVerification')
 const generateVerificationCode = (length = 4) => {
